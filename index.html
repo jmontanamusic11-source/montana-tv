@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MONTANA TV</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#0b0b0b;color:#fff;font-family:Arial,sans-serif}
+header{padding:20px;text-align:center;background:#151515;border-bottom:1px solid #333}
+header h1{margin:0;font-size:28px}
+header p{margin:8px 0 0;color:#aaa}
+main{max-width:850px;margin:auto;padding:20px}
+.buscador{display:flex;gap:10px;margin-bottom:20px}
+.buscador input{flex:1;min-width:0;padding:14px;border:1px solid #333;border-radius:10px;background:#181818;color:#fff;font-size:16px}
+.buscador button{padding:14px 18px;border:0;border-radius:10px;background:#e50914;color:#fff;font-size:16px}
+.player{width:100%;aspect-ratio:16/9;background:#000;border-radius:12px;overflow:hidden;margin-bottom:18px}
+.player iframe{width:100%;height:100%;border:0}
+.titulo{font-size:21px;font-weight:bold;margin-bottom:18px}
+.categorias{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px}
+.categorias button,.video button{padding:14px;border:1px solid #333;border-radius:10px;background:#191919;color:#fff;font-size:14px}
+.videos{display:grid;gap:10px}
+.video{display:flex;align-items:center;gap:12px;padding:13px;border:1px solid #292929;border-radius:10px;background:#151515}
+.video button{flex-shrink:0;background:#e50914;border:0}
+.video-info{min-width:0}
+.video-info strong{display:block;margin-bottom:4px}
+.video-info span{color:#999;font-size:13px}
+.aviso{margin-top:25px;color:#777;font-size:13px;text-align:center;line-height:1.5}
+.mensaje{margin:15px 0;color:#aaa;text-align:center;display:none}
+@media(max-width:500px){main{padding:14px}.buscador{flex-direction:column}.buscador button{width:100%}}
+</style>
+</head>
+<body>
+<header>
+<h1>🎬 MONTANA TV</h1>
+<p>Videos oficiales y música</p>
+</header>
+<main>
+<div class="buscador">
+<input id="busqueda" type="search" placeholder="🔎 Buscar artista o canción..." autocomplete="off">
+<button type="button" id="buscarBtn">Buscar</button>
+</div>
+
+<div class="player">
+<iframe id="reproductor" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="MONTANA TV" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</div>
+
+<div class="titulo" id="tituloActual">🎵 MONTANA TV</div>
+
+<div class="categorias">
+<button type="button" data-categoria="tendencias">🔥 Tendencias</button>
+<button type="button" data-categoria="estrenos">🆕 Estrenos</button>
+<button type="button" data-categoria="oficiales">🎤 Videos oficiales</button>
+<button type="button" data-categoria="regional">🤠 Regional mexicano</button>
+</div>
+
+<div class="mensaje" id="mensaje">No encontramos videos con esa búsqueda.</div>
+
+<div class="videos" id="listaVideos">
+<div class="video" data-categorias="tendencias oficiales regional" data-texto="Montana TV">
+<button type="button" data-video="dQw4w9WgXcQ" data-titulo="MONTANA TV">▶️</button>
+<div class="video-info"><strong>MONTANA TV</strong><span>Video destacado</span></div>
+</div>
+
+<div class="video" data-categorias="estrenos oficiales" data-texto="Videos oficiales">
+<button type="button" data-video="dQw4w9WgXcQ" data-titulo="Videos oficiales">▶️</button>
+<div class="video-info"><strong>Videos oficiales</strong><span>Selección Montana TV</span></div>
+</div>
+
+<div class="video" data-categorias="regional tendencias" data-texto="Regional mexicano">
+<button type="button" data-video="dQw4w9WgXcQ" data-titulo="Regional mexicano">▶️</button>
+<div class="video-info"><strong>Regional mexicano</strong><span>Música regional</span></div>
+</div>
+</div>
+
+<div class="aviso">Los videos se reproducen mediante el reproductor oficial de YouTube.</div>
+</main>
+
+<script>
+const reproductor=document.getElementById("reproductor");
+const tituloActual=document.getElementById("tituloActual");
+const busqueda=document.getElementById("busqueda");
+const buscarBtn=document.getElementById("buscarBtn");
+const mensaje=document.getElementById("mensaje");
+const videos=Array.from(document.querySelectorAll(".video"));
+
+function reproducirVideo(id,titulo){
+reproductor.src="https://www.youtube.com/embed/"+encodeURIComponent(id)+"?autoplay=1";
+tituloActual.textContent="🎵 "+titulo;
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+document.querySelectorAll("[data-video]").forEach(function(boton){
+boton.addEventListener("click",function(){
+reproducirVideo(boton.dataset.video,boton.dataset.titulo);
+});
+});
+
+function filtrar(texto){
+const termino=texto.trim().toLowerCase();
+let encontrados=0;
+videos.forEach(function(video){
+const coincide=termino===""||video.dataset.texto.toLowerCase().includes(termino);
+video.style.display=coincide?"flex":"none";
+if(coincide)encontrados++;
+});
+mensaje.style.display=encontrados===0?"block":"none";
+}
+
+buscarBtn.addEventListener("click",function(){filtrar(busqueda.value)});
+busqueda.addEventListener("keydown",function(e){if(e.key==="Enter")filtrar(busqueda.value)});
+
+document.querySelectorAll("[data-categoria]").forEach(function(boton){
+boton.addEventListener("click",function(){
+const categoria=boton.dataset.categoria;
+let encontrados=0;
+videos.forEach(function(video){
+const coincide=video.dataset.categorias.split(" ").includes(categoria);
+video.style.display=coincide?"flex":"none";
+if(coincide)encontrados++;
+});
+mensaje.style.display=encontrados===0?"block":"none";
+});
+});
+</script>
+</body>
+</html>
