@@ -55,6 +55,7 @@ main{max-width:850px;margin:auto;padding:20px}
 </div>
 
 <div class="mensaje" id="mensaje">No encontramos videos con esa búsqueda.</div>
+<div id="resultadosYoutube" class="videos"></div>
 
 <div class="videos" id="listaVideos">
 <div class="video" data-categorias="tendencias oficiales regional" data-texto="Montana TV">
@@ -77,6 +78,8 @@ main{max-width:850px;margin:auto;padding:20px}
 </main>
 
 <script>
+const YT_API_KEY='AIzaSyDsY6woJm0vh71tSWxZwS7kPgwNt8jjlEU';
+
 const reproductor=document.getElementById("reproductor");
 const tituloActual=document.getElementById("tituloActual");
 const busqueda=document.getElementById("busqueda");
@@ -96,16 +99,7 @@ reproducirVideo(boton.dataset.video,boton.dataset.titulo);
 });
 });
 
-function filtrar(texto){
-const termino=texto.trim().toLowerCase();
-let encontrados=0;
-videos.forEach(function(video){
-const coincide=termino===""||video.dataset.texto.toLowerCase().includes(termino);
-video.style.display=coincide?"flex":"none";
-if(coincide)encontrados++;
-});
-mensaje.style.display=encontrados===0?"block":"none";
-}
+async function filtrar(texto){const termino=texto.trim();if(!termino){videos.forEach(function(v){v.style.display="flex"});document.getElementById("resultadosYoutube").innerHTML="";mensaje.style.display="none";return}videos.forEach(function(v){v.style.display="none"});mensaje.style.display="none";const caja=document.getElementById("resultadosYoutube");caja.innerHTML="<div class="mensaje" style="display:block">Buscando en YouTube...</div>";try{const url="https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=8&q="+encodeURIComponent(termino)+"&key="+encodeURIComponent(YT_API_KEY);const r=await fetch(url);const data=await r.json();if(!r.ok)throw new Error(data.error?.message||"Error de YouTube");if(!data.items?.length){caja.innerHTML="<div class="mensaje" style="display:block">No encontramos videos.</div>";return}caja.innerHTML="";data.items.forEach(function(item){const d=document.createElement("div");d.className="video";d.innerHTML="<button type="button">▶️</button><div class="video-info"><strong></strong><span></span></div>";d.querySelector("strong").textContent=item.snippet.title;d.querySelector("span").textContent=item.snippet.channelTitle;d.querySelector("button").addEventListener("click",function(){reproducirVideo(item.id.videoId,item.snippet.title)});caja.appendChild(d)})}catch(e){caja.innerHTML="<div class="mensaje" style="display:block">Error al buscar en YouTube: "+e.message+"</div>"}}
 
 buscarBtn.addEventListener("click",function(){filtrar(busqueda.value)});
 busqueda.addEventListener("keydown",function(e){if(e.key==="Enter")filtrar(busqueda.value)});
